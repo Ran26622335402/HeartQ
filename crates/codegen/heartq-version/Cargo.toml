@@ -1,0 +1,12 @@
+[package]
+license = "Apache-2.0"
+name = "heartq-version"
+version = "0.2.109"
+edition.workspace = true
+description = "Lockstepped heartq CLI version."
+
+[dependencies]
+semver = { workspace = true }
+
+[lints]
+workspace = true

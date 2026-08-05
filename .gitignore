@@ -1,0 +1,25 @@
+/target
+**/*.rs.bk
+.DS_Store
+
+# Local / packaging artifacts (keep sources; ignore bulky binaries)
+/dist/
+/artifacts/
+/deploy_materials_*/
+/deploy_materials_*.tar.gz
+**/.venv/
+**/node_modules/
+*.bak.*
+heartq.bak.*
+
+# Dialogue test run outputs (keep cases/scripts; ignore bulky logs)
+/docs/dialogue-tests/results/
+
+# Editor / OS
+.idea/
+.vscode/
+*.swp
+*~
+
+# Patent disclosure materials (local only; do not publish)
+/docs/patents/

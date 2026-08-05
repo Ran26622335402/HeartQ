@@ -1,0 +1,27 @@
+[package]
+license = "Apache-2.0"
+name = "heartq-compaction"
+version = "0.1.0"
+edition.workspace = true
+description = "Shared, transport-agnostic compaction engine for HeartQ chat and HeartQ Build."
+
+[dependencies]
+anyhow = { workspace = true }
+async-trait = { workspace = true }
+chrono = { workspace = true }
+once_cell = { workspace = true }
+parking_lot = { workspace = true }
+regex = { workspace = true }
+rusqlite = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true, features = ["time", "macros"] }
+tracing = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
+
+[lints]
+workspace = true

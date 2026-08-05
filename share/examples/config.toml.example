@@ -1,0 +1,176 @@
+# Grok Build — 内网 / 离线部署示例配置
+#
+# 用法：
+#   mkdir -p ~/.grok
+#   cp share/examples/config.toml.example ~/.grok/config.toml
+#   按下方注释修改 base_url / model / context_window
+#
+# 说明：
+# - 本示例面向内网 OpenAI 兼容服务（推荐 vLLM / 同类网关）
+# - api_backend 必须使用 chat_completions（勿用 responses）
+# - 完整 Agent（改文件 / 跑命令）需要服务端支持 function / tool calling
+# - 纯聊天可关闭工具相关能力，但体验会受限
+
+[cli]
+auto_update = false
+
+[models]
+# 默认模型：对应下方 [model.<name>] 段名
+default = "local-vllm"
+temperature = 0.7
+top_p = 0.95
+max_completion_tokens = 8192
+max_retries = 8
+# 流空闲超时（秒）。内网慢模型 / 长思考建议 600~1800
+inference_idle_timeout_secs = 900
+
+# ---------------------------------------------------------------------------
+# 本地 / 内网 vLLM（推荐）
+# ---------------------------------------------------------------------------
+# 服务端示例：
+#   vllm serve <model> \
+#     --host 0.0.0.0 --port 8000 \
+#     --served-model-name local-agent \
+#     --max-model-len 32768 \
+#     --enable-auto-tool-choice \
+#     --tool-call-parser hermes
+#
+# 连通性自检：
+#   curl -s http://127.0.0.1:8000/v1/models
+#   curl -s http://127.0.0.1:8000/v1/chat/completions \
+#     -H 'Content-Type: application/json' \
+#     -d '{"model":"local-agent","messages":[{"role":"user","content":"hi"}],"stream":false}'
+
+[model.local-vllm]
+model = "local-agent"                      # 与 vLLM --served-model-name 一致
+base_url = "http://127.0.0.1:8000/v1"      # 内网地址，按实际修改
+name = "Local vLLM"
+description = "内网 vLLM OpenAI 兼容端点"
+api_backend = "chat_completions"
+# 无鉴权可省略 api_key；若 vLLM 启用了 --api-key，取消下一行注释：
+# api_key = "YOUR_VLLM_API_KEY"
+# 或：env_key = "VLLM_API_KEY"
+context_window = 32768                     # 必须与 --max-model-len 对齐
+max_completion_tokens = 8192
+supports_reasoning_effort = false
+supports_backend_search = false
+
+# ---------------------------------------------------------------------------
+# 内网 OpenAI 兼容网关（可选，按需启用）
+# ---------------------------------------------------------------------------
+# [model.intranet-gateway]
+# model = "qwen2.5-72b-instruct"
+# base_url = "http://llm-gateway.internal:8080/v1"
+# name = "Intranet Gateway"
+# api_backend = "chat_completions"
+# api_key = "YOUR_GATEWAY_API_KEY"
+# # env_key = "INTRANET_LLM_API_KEY"
+# context_window = 131072
+# max_completion_tokens = 8192
+# supports_reasoning_effort = false
+# supports_backend_search = false
+
+# ---------------------------------------------------------------------------
+# 公网兼容端点（可选；纯内网请保持注释）
+# ---------------------------------------------------------------------------
+# [model."minimax-m2.7"]
+# model = "MiniMax-M2.7"
+# base_url = "https://api.minimaxi.com/v1"
+# name = "MiniMax M2.7"
+# api_backend = "chat_completions"
+# api_key = "YOUR_MINIMAX_API_KEY"
+# context_window = 204800
+# max_completion_tokens = 8192
+
+[session]
+# 达到 context_window 的该比例时触发自动压缩
+auto_compact_threshold_percent = 80
+load_envrc = true
+
+[ui]
+simple_mode = true
+permission_mode = "always-approve"
+remember_tool_approvals = false
+show_thinking_blocks = true
+
+[features]
+# 内网必须关闭外联
+telemetry = false
+feedback = false
+remote_fetch = false
+lsp_tools = false
+codebase_indexing = true
+
+# ---------------------------------------------------------------------------
+# Hermes/OpenSquilla 集成：启动即自动开启（默认启用）
+# ---------------------------------------------------------------------------
+#
+# 说明：
+# - memory：打开 Hermes 记忆系统（含 dream/enhanced dream 分支）
+# - compaction.memory_flush / compaction.pruning：打开 Hermes 上下文压缩前置/剪枝
+# - background_review / curator / meta_skill_auto_trigger / auto_propose：
+#   这些配置项在后续接入 host 调度后生效（目前示例先补齐段落）。
+
+[memory]
+enabled = true
+
+[compaction.memory_flush]
+enabled = true
+# 当用户长时间不发消息时，自动触发一次 flush 以保证内存索引与压缩链路的新鲜度
+idle_timeout_secs = 60
+
+[compaction.pruning]
+enabled = true
+# 同时驱动 chat_state 软裁剪与 full-replace 路径上的 Hermes ToolResultPruner
+
+[background_review]
+enabled = true
+interval_turns = 5
+
+[curator]
+enabled = true
+interval_hours = 24
+min_idle_hours = 1.0
+stale_after_days = 30
+archive_after_days = 90
+
+[meta_skill_auto_trigger]
+enabled = true
+
+[auto_propose]
+enabled = true
+
+# ---------------------------------------------------------------------------
+# Multi-model smart router (OpenSquilla-compatible c0–c3 tiers)
+# ---------------------------------------------------------------------------
+# Default: disabled. Set enabled=true and map tiers to catalog keys from
+# `[model.<name>]` above. rollout_phase=observe logs decisions without
+# switching models; full applies an ephemeral per-turn model switch.
+#
+#   HEARTQ_MODEL_ROUTER=1  # force-enable even if enabled=false in TOML
+#
+# Inspect status in the TUI with `/router`.
+
+[model_router]
+enabled = false
+# heuristic | squilla_v4  (squilla_v4 needs squilla-runtime/.venv + V4 bundle)
+strategy = "heuristic"
+rollout_phase = "observe"
+default_tier = "c1"
+complaint_upgrade = true
+anti_downgrade = true
+squilla_fallback_heuristic = true
+# squilla_python = "/path/to/squilla-runtime/.venv/bin/python"
+# squilla_bundle_dir = "/path/to/v4.2_phase3_inference"
+
+[model_router.tiers.c0]
+model = "minimax-m2.7"
+
+[model_router.tiers.c1]
+model = "minimax-m2.7"
+
+[model_router.tiers.c2]
+model = "minimax-m2.7"
+
+[model_router.tiers.c3]
+model = "minimax-m2.7"

@@ -1,0 +1,25 @@
+# Copy to ~/.grok/config.toml and edit.
+# For intranet / local vLLM, prefer:
+#   cp share/examples/config.toml.example ~/.grok/config.toml
+
+[cli]
+auto_update = false
+
+[models]
+default = "local-vllm"
+
+[model.local-vllm]
+model = "local-agent"
+base_url = "http://127.0.0.1:8000/v1"
+name = "Local vLLM"
+api_backend = "chat_completions"
+# api_key = "YOUR_VLLM_API_KEY"
+context_window = 32768
+max_completion_tokens = 8192
+supports_reasoning_effort = false
+supports_backend_search = false
+
+[features]
+telemetry = false
+feedback = false
+remote_fetch = false
