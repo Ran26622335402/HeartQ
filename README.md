@@ -11,7 +11,6 @@
 [贡献](#贡献) ·
 [许可证](#许可证)
 
-![HeartQ Build TUI](https://media.x.ai/v1/website/universe-tui-screenshot-6f7a0837.png)
 
 本仓库包含 `heartq` CLI / TUI 与智能体运行时的 Rust 源码。根目录 `SOURCE_REV` 记录对应上游提交 SHA。
 
