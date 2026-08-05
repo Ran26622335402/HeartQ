@@ -18,9 +18,6 @@
 
 ---
 
-## 功能点总览
-
-> **核对说明（2026-08-04）**：下列能力均已在源码中落实（非文档愿望）。完整 F01–F120 见 [`docs/patents/HeartQ-源码功能点报告.md`](docs/patents/HeartQ-源码功能点报告.md)；算法默认值见 [`docs/patents/HeartQ-算法逻辑与公式手册.md`](docs/patents/HeartQ-算法逻辑与公式手册.md)。
 
 ### 架构分层
 
