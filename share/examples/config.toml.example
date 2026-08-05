@@ -1,8 +1,8 @@
-# Grok Build — 内网 / 离线部署示例配置
+# HeartQ — 内网 / 离线部署示例配置
 #
 # 用法：
-#   mkdir -p ~/.grok
-#   cp share/examples/config.toml.example ~/.grok/config.toml
+#   mkdir -p ~/.heartq
+#   cp share/examples/config.toml.example ~/.heartq/config.toml
 #   按下方注释修改 base_url / model / context_window
 #
 # 说明：

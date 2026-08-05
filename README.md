@@ -1,9 +1,11 @@
+<div align="center">
 
+# HeartQ（`heartq`）
 
-**HeartQ Build（红桃 Q）** 是终端里的 AI 编程智能体（由 HyperAI 打造）。它以全屏 TUI 运行，能理解代码库、编辑文件、执行 shell、搜索网页并管理长任务；支持交互使用、无头模式（脚本 / CI），以及通过 Agent Client Protocol（ACP）嵌入编辑器。
+**HeartQ（红桃 Q）** 是终端里的 AI 编程智能体（由 HyperAI 打造）。它以全屏 TUI 运行，能理解代码库、编辑文件、执行 shell、搜索网页并管理长任务；支持交互使用、无头模式（脚本 / CI），以及通过 Agent Client Protocol（ACP）嵌入编辑器。
 
 [功能点总览](#功能点总览) ·
-[安装预编译包](#安装预编译包) ·
+[获取与安装](#获取与安装) ·
 [编译与安装](#编译与安装) ·
 [文档](#文档) ·
 [仓库结构](#仓库结构) ·
@@ -11,13 +13,15 @@
 [贡献](#贡献) ·
 [许可证](#许可证)
 
-
 本仓库包含 `heartq` CLI / TUI 与智能体运行时的 Rust 源码。根目录 `SOURCE_REV` 记录对应上游提交 SHA。
 
 </div>
 
 ---
 
+## 功能点总览
+
+> **核对说明（2026-08-04）**：下列能力均已在源码中落实（非文档愿望）。完整 F01–F120 与算法默认值见仓库内文档索引 [`docs/README.md`](docs/README.md)（专利交底材料默认不随公开仓库发布）。
 
 ### 架构分层
 
@@ -79,21 +83,16 @@ A 会话运行时 → B 子智能体/Goal → C 元技能 → D 模型路由 →
 | I UX | F103–F114 | 70+ 斜杠命令、主题、语音、极简模式等 |
 | J 其它 | F115–F120 | 配置热更、遥测开关、更新通道等（详见报告） |
 
-逐条锚点与专利映射请以功能点报告为准，勿以 README 摘要替代交底真源。
+## 获取与安装
 
-## 安装预编译包
+本公开仓库以**源码编译**为主分发方式，不提供 x.ai / Grok 官方安装通道。
 
-官方预编译包支持 macOS、Linux、Windows：
+| 方式 | 说明 |
+|------|------|
+| 从源码编译 | 见下方 [编译与安装](#编译与安装)（推荐） |
+| 同架构离线包 | 在本机编出 Release 后，用 [`scripts/pack-linux-arm64.sh`](scripts/pack-linux-arm64.sh) 打 `heartq-build-*-linux-arm64.tar.gz`，拷到同架构机器解压运行 |
 
-```sh
-curl -fsSL https://x.ai/cli/install.sh | bash   # macOS / Linux / Git Bash
-irm https://x.ai/cli/install.ps1 | iex          # Windows PowerShell
-heartq --version
-```
-
-变更说明见 [changelog](https://x.ai/build/changelog)。
-
-若使用本仓库自行编译的产物，请跳过本节，直接看 [编译与安装](#编译与安装)。
+示例配置见 [`share/examples/config.toml.example`](share/examples/config.toml.example)（指向本机 / 内网 OpenAI 兼容接口，如 vLLM）。
 
 ## 编译与安装
 
@@ -190,7 +189,7 @@ cp -a target/release/heartq-pager ~/.heartq/bin/heartq.new
 mv -f ~/.heartq/bin/heartq.new ~/.heartq/bin/heartq
 ```
 
-首次启动可能打开浏览器进行认证，参见 [认证说明](crates/codegen/heartq-pager/docs/user-guide/02-authentication.md)。
+首次启动与认证流程见 [认证说明](crates/codegen/heartq-pager/docs/user-guide/02-authentication.md)。
 
 ### 4. 打包（同架构 Linux 离线分发）
 
@@ -211,7 +210,7 @@ cp share/examples/config.toml ~/.heartq/config.toml   # 按需修改 base_url / 
 ./bin/heartq
 ```
 
-**注意：** 二进制与 CPU / OS 绑定。在 aarch64 Linux 上编出的包 **不能** 直接在 Windows 或 Linux x86_64 上运行；那些平台需在对应环境重新编译，或使用该平台的预编译包。
+**注意：** 二进制与 CPU / OS 绑定。在 aarch64 Linux 上编出的包 **不能** 直接在 Windows 或 Linux x86_64 上运行；那些平台需在对应环境重新编译。
 
 ### 5. 清理编译缓存（保留产物）
 
@@ -230,9 +229,9 @@ cp -a /tmp/heartq-pager.keep target/release/heartq-pager
 | 文档 | 说明 |
 |------|------|
 | [`docs/README.md`](docs/README.md) | 仓库内文档索引 |
-| [`docs/patents/HeartQ-源码功能点报告.md`](docs/patents/HeartQ-源码功能点报告.md) | F01–F120 功能点真源 |
 | [`crates/codegen/heartq-pager/docs/user-guide/`](crates/codegen/heartq-pager/docs/user-guide/) | 产品用户指南（配置、斜杠命令、MCP、技能等） |
-| [docs.x.ai/build/overview](https://docs.x.ai/build/overview) | 在线文档 |
+| [`docs/dialogue-tests/`](docs/dialogue-tests/) | 对话 / ACP 集成用例 |
+| [`docs/HERMES_INTEGRATION.md`](docs/HERMES_INTEGRATION.md) | Hermes / OpenSquilla 相关集成说明 |
 
 ## 仓库结构
 
@@ -247,11 +246,11 @@ cp -a /tmp/heartq-pager.keep target/release/heartq-pager
 | `crates/common/heartq-compaction` | 压缩、义务、剪枝、SafetyMode |
 | `crates/codegen/xai-workflow` | Rhai 工作流 + Journal |
 | `crates/codegen/...` | 其余 CLI 闭包（配置、MCP、沙箱、workspace 等） |
-| `docs/` | 功能点报告、专利交底、对话测试用例 |
+| `docs/` | 文档索引、对话测试用例等 |
 | `scripts/` | 打包等辅助脚本（如 `pack-linux-arm64.sh`） |
 | `share/examples/` | 示例配置 |
 
-**请勿提交**（已在 `.gitignore`）：`target/`、`dist/`、`artifacts/`、`deploy_materials_*`、`docs/dialogue-tests/results/`、`**/.venv/`。
+**请勿提交**（已在 `.gitignore`）：`target/`、`dist/`、`artifacts/`、`deploy_materials_*`、`docs/patents/`、`docs/dialogue-tests/results/`、`**/.venv/`。
 
 > [!IMPORTANT]
 > 根目录 `Cargo.toml`（workspace 成员、依赖版本、lint、profile）为**生成文件**，请视为只读；优先修改各 crate 自己的 `Cargo.toml`。
