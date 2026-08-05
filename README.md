@@ -1,14 +1,4 @@
-<div align="center">
 
-<h1>
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://media.x.ai/v1/website/spacexai-symbol-white-transparent-0c31957f.png">
-    <source media="(prefers-color-scheme: light)" srcset="https://media.x.ai/v1/website/spacexai-symbol-black-transparent-6435cf42.png">
-    <img alt="HeartQ logo" src="https://media.x.ai/v1/website/spacexai-symbol-black-transparent-6435cf42.png" width="96">
-  </picture>
-  <br>
-  HeartQ Build（<code>heartq</code>）
-</h1>
 
 **HeartQ Build（红桃 Q）** 是终端里的 AI 编程智能体（由 HyperAI 打造）。它以全屏 TUI 运行，能理解代码库、编辑文件、执行 shell、搜索网页并管理长任务；支持交互使用、无头模式（脚本 / CI），以及通过 Agent Client Protocol（ACP）嵌入编辑器。
 
